@@ -9,22 +9,22 @@ import './assets/prism.css'
 import { useAppContext } from './context/AppContext'
 import Login from './pages/Login'
 import Loading from './pages/Loading'
+import {Toaster} from 'react-hot-toast'
+import { Menu } from 'lucide-react'
 
+const App = () => {   
 
-const App = () => {
+  const {user,loadingUser} =useAppContext() 
   const [isMenuOpen, setIsMenuOpen] = useState(false)   
    const {pathname} = useLocation()   
    
-  if(pathname === '/loading') return <Loading/> 
-
-  const { user } = useAppContext()
-
+  if(pathname === '/loading' || loadingUser) return <Loading/> 
 
   return (
-    <>
+    <>   
+    <Toaster/>
       {!isMenuOpen && (
-        <img
-          src={assets.send_icon}
+        <Menu
           className="absolute top-3 left-3 w-8 h-8 cursor-pointer md:hidden dark:invert"
           onClick={() => setIsMenuOpen(true)}
           alt=""

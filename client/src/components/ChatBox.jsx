@@ -3,11 +3,12 @@ import { useAppContext } from '../context/AppContext'
 import { assets } from '../assets/assets'
 import Message from './Message'
 import { useRef } from 'react'
+import toast from 'react-hot-toast'
 
 const ChatBox = () => {
 
   const containerRef = useRef(null)
-  const { selectedChat, theme } = useAppContext()
+  const { selectedChat, theme, user, axios, token, setUser } = useAppContext()
 
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(false)
@@ -17,8 +18,62 @@ const ChatBox = () => {
   const [isPublished, setIsPublished] = useState(false)
 
   const onSubmit = async (e) => {
-    e.preventDefault()
-  }
+    try {
+      e.preventDefault();
+
+      if (!user) return toast('Login to send message');
+      if (!selectedChat) {
+        return toast('Please select a chat first');
+      }
+
+      setLoading(true);
+      const promptCopy = prompt;
+      setPrompt('');
+
+      setMessages(prev => [
+        ...prev,
+        {
+          role: 'user',
+          content: prompt,
+          timestamp: Date.now(),
+          isImage: false,
+        },
+      ]);
+
+      const { data } = await axios.post(
+        `/api/message/${mode}`,
+        {
+          chatId: selectedChat._id,
+          prompt,
+          isPublished,
+        },
+        {
+          headers: { Authorization: token },
+        }
+      );
+
+      if (data.success) {
+        setMessages(prev => [...prev, data.reply]);
+
+        // decrease credits
+        if (mode === 'image') {
+          setUser(prev => ({ ...prev, credits: prev.credits - 2 }));
+        } else {
+          setUser(prev => ({ ...prev, credits: prev.credits - 1 }));
+        }
+      } else {
+        toast.error(data.message);
+        setPrompt(promptCopy);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setPrompt('');
+      setLoading(false);
+    }
+  };
+
+
 
   useEffect(() => {
     if (selectedChat) {
@@ -68,17 +123,6 @@ const ChatBox = () => {
 
       </div>
 
-      {mode === 'image' && (
-        <label className='inline-flex items-center gap-2 mb-3 text-sm mx-auto'>
-          <p className='text-xs'>Publish Generated Image to Community</p>
-          <input
-            type="checkbox"
-            className='cursor-pointer'
-            checked={isPublished}
-            onChange={(e) => setIsPublished(e.target.checked)}
-          />
-        </label>
-      )}
 
 
       {/* Prompt Input Box */}
@@ -87,20 +131,32 @@ const ChatBox = () => {
         <select
           onChange={(e) => setMode(e.target.value)}
           value={mode}
-          className='text-sm pl-3 pr-2 outline-none'
+          className="w-28 px-2 py-2 rounded-xl text-sm
+    bg-white text-black border border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    placeholder-gray-500 dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-purple-500
+  "
         >
           <option className='dark:bg-purple-900' value="text">Text</option>
           <option className='dark:bg-purple-900' value="image">Image</option>
         </select>
-
         <input
           onChange={(e) => setPrompt(e.target.value)}
           value={prompt}
           type="text"
-          placeholder="Type your prompt here..."
-          className='flex-1 w-full text-sm outline-none'
+          placeholder={selectedChat ? "Type your prompt here..." : "Select a chat first"}
+          className="
+    flex-1 w-full px-4 py-3 rounded-xl text-sm
+    bg-white text-black border border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    placeholder-gray-500 dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-purple-500
+  "
           required
+          disabled={!selectedChat}
         />
+
 
         <button disabled={loading}>
           <img
@@ -117,4 +173,4 @@ const ChatBox = () => {
   )
 }
 
-export default ChatBox
+export default ChatBox 

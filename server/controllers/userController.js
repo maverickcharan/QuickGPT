@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
+import Chat from './../models/Chat.js';
 
 
 const generateToken = (id) => {
@@ -83,7 +84,7 @@ export const getPublishedImages = async (req, res) => {
     ]);
     res.json({success:true , images : publishedImageMessages.reverse()})
   }
-  catch{
+  catch(error){
     return res.json({success:false, message:error.message})
   }
 }

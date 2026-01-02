@@ -28,7 +28,7 @@ const Plans = [
 
 export const getPlans = async (req, res) => {
     try {
-        res.json({ success: true, Plans });
+        res.json({ success: true, plans:Plans });
     } catch (error) {
         res.json({ success: false, message: error.message });
     }
