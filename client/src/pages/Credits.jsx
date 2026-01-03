@@ -33,7 +33,13 @@ const Credits = () => {
       const { data } = await axios.post(
         '/api/credit/purchase',
         { planId },
-        { headers: { Authorization: token } }
+        {
+
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+
+        }
       );
 
       if (data.success) {

@@ -8,7 +8,7 @@ import { Trash2 } from 'lucide-react';
 
 const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
 
-    const { chats, setSelectedChat, theme, setTheme, user, navigate, createNewChat, axios, setChats, fetchUsersChats, setToken,token } = useAppContext();
+    const { chats, setSelectedChat, theme, setTheme, user, navigate, createNewChat, axios, setChats, fetchUsersChats, setToken, token } = useAppContext();
 
     const [search, setSearch] = useState('');
 
@@ -32,7 +32,10 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
                 '/api/chat/delete',
                 { chatId },
                 {
-                    headers: { Authorization: token },
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+
                 }
             );
 
@@ -66,7 +69,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
             </button>
 
             <div className='flex items-center gap-2 p-3 mt-4 border border-gray-400 dark:border-white/20 rounded-md'>
-                <Search/>
+                <Search />
 
                 <input
                     onChange={(e) => setSearch(e.target.value)} value={search} type="text" placeholder='Search conversations'
@@ -76,7 +79,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
     placeholder-gray-500 dark:placeholder-gray-400
     focus:outline-none focus:ring-2 focus:ring-purple-500
   "
-                    />
+                />
             </div>
 
             {chats.length > 0 && <p className='mt-4 text-sm'>Recent Chats</p>}
@@ -122,7 +125,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
                  p-3 mt-4 border border-gray-300 dark:border-white/15 rounded-md 
                  cursor-pointer hover:scale-105 transition-all'>
                 <Image
-                 className='w-4 h-4 text-gray-800 dark:text-gray-200' alt="" />
+                    className='w-4 h-4 text-gray-800 dark:text-gray-200' alt="" />
 
                 <div className='flex flex-col text-sm'>
                     <p>Community Images</p>
@@ -179,7 +182,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
 
                 {user && (
                     <LogOut onClick={logout}
-                        
+
                         className="h-5 cursor-pointer rotate-180 hidden not-dark:invert group-hover:block"
                         alt=""
                     />
@@ -187,7 +190,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
 
             </div>
             <X onClick={() => setIsMenuOpen(false)}
-            
+
                 className="absolute top-3 right-3 w-7 h-7 cursor-pointer md:hidden dark:invert"
                 alt=""
             />

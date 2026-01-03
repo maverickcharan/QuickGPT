@@ -26,7 +26,11 @@ const ChatBox = () => {
         return toast('Please select a chat first');
       }
 
-      setLoading(true);
+      setLoading(true);   
+
+
+
+      
       const promptCopy = prompt;
       setPrompt('');
 
@@ -40,6 +44,16 @@ const ChatBox = () => {
         },
       ]);
 
+
+      // ADD THIS LOG TO SEE WHAT'S BEING SENT
+      console.log('Sending request:', {
+        mode: mode,
+        endpoint: `/api/message/${mode}`,
+        chatId: selectedChat._id,
+        prompt: prompt,
+        isPublished: isPublished
+      });
+
       const { data } = await axios.post(
         `/api/message/${mode}`,
         {
@@ -48,7 +62,10 @@ const ChatBox = () => {
           isPublished,
         },
         {
-          headers: { Authorization: token },
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+
         }
       );
 
@@ -66,7 +83,8 @@ const ChatBox = () => {
         setPrompt(promptCopy);
       }
     } catch (error) {
-      toast.error(error.message);
+      const errMsg = error.response?.data?.message || error.message;
+      toast.error(errMsg);
     } finally {
       setPrompt('');
       setLoading(false);

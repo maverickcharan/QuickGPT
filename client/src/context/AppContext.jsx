@@ -5,7 +5,6 @@ import axios from 'axios';
 import toast from "react-hot-toast";
 
 axios.defaults.baseURL = import.meta.env.VITE_SERVER_URL;
-import { mac } from './../../node_modules/zod/src/v4/core/regexes';
 
 const AppContext = createContext();
 
@@ -23,8 +22,9 @@ export const AppContextProvider = ({ children }) => {
         try {
             const { data } = await axios.get('/api/user/data', {
                 headers: {
-                    Authorization: token // include 'Bearer ' if your backend expects it
-                },
+                    Authorization: `Bearer ${token}`
+                }
+
             });
 
             if (data.success) {
@@ -33,7 +33,7 @@ export const AppContextProvider = ({ children }) => {
                 toast.error(data.message)
             }
         } catch (error) {
-            toast.error(error.macessage)
+            toast.error(error.message)
         } finally {
             setLoadingUser(false)
         }
@@ -94,8 +94,8 @@ export const AppContextProvider = ({ children }) => {
 
 
     const value = {
-        navigate, user, setUser, fetchUser, chats, setChats, selectedChat, setSelectedChat, 
-        theme, setTheme,createNewChat,loadingUser,fetchUsersChats,token,setToken,axios
+        navigate, user, setUser, fetchUser, chats, setChats, selectedChat, setSelectedChat,
+        theme, setTheme, createNewChat, loadingUser, fetchUsersChats, token, setToken, axios
     };
 
     return <AppContext.Provider value={value}>

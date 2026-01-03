@@ -4,7 +4,7 @@ import { useAppContext } from '../context/AppContext';
 
 const Login = () => {
 
-    const {axios,setToken} = useAppContext()
+    const { axios, setToken } = useAppContext()
 
     const [state, setState] = useState("login");
     const [name, setName] = useState("");
@@ -20,11 +20,13 @@ const Login = () => {
             if (data.success) {
                 setToken(data.token);
                 localStorage.setItem('token', data.token);
+                axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+
             } else {
-                toast.error(data.message); 
+                toast.error(data.message);
             }
         } catch (error) {
-            toast.error(error.message );
+            toast.error(error.message);
         }
     };
 
@@ -41,7 +43,7 @@ const Login = () => {
             )}
             <div className="w-full ">
                 <p>Email</p>
-                <input onChange={(e) => setEmail(e.target.value)} value={email} placeholder="type here"  className="border border-gray-200 rounded w-full p-2 mt-1 outline-purple-700" type="email" required />
+                <input onChange={(e) => setEmail(e.target.value)} value={email} placeholder="type here" className="border border-gray-200 rounded w-full p-2 mt-1 outline-purple-700" type="email" required />
             </div>
             <div className="w-full ">
                 <p>Password</p>

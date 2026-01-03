@@ -88,8 +88,39 @@ export const imageMessageController = async (req, res) => {
         // Construct ImageKit AI generation URL
         const generatedImageUrl = `${process.env.IMAGEKIT_URL_ENDPOINT}/ik-genimg-prompt-${encodedPrompt}/quickgpt/${Date.now()}.png?tr=w-800,h-800`;
 
-        // Trigger generation by fetching from ImageKit
-        const aiImageResponse = await axios.get(generatedImageUrl, { responseType: "arraybuffer" });
+        // Log URL (sanitized) to help debugging
+        console.log('Image generation URL:', generatedImageUrl);
+
+        // Trigger generation by fetching from ImageKit — handle errors specifically
+        let aiImageResponse;
+        try {
+            aiImageResponse = await axios.get(generatedImageUrl, { responseType: "arraybuffer" });
+        } catch (err) {
+            console.error('Image generation failed:', err.response?.status, err.response?.data || err.message);
+
+            // If ImageKit returns 403, try retrying the request with basic auth using the private key
+            if (err.response?.status === 403 && process.env.IMAGEKIT_PRIVATE_KEY) {
+                console.log('Received 403 — attempting retry using IMAGEKIT_PRIVATE_KEY as basic auth username');
+                try {
+                    aiImageResponse = await axios.get(generatedImageUrl, {
+                        responseType: 'arraybuffer',
+                        auth: { username: process.env.IMAGEKIT_PRIVATE_KEY, password: '' }
+                    });
+                    console.log('Retry with auth succeeded');
+                } catch (err2) {
+                    console.error('Retry with auth failed:', err2.response?.status, err2.response?.data || err2.message);
+                    return res.status(err2.response?.status || 500).json({
+                        success: false,
+                        message: err2.response?.data?.message || `Image generation failed with status ${err2.response?.status || 500}`
+                    });
+                }
+            } else {
+                return res.status(err.response?.status || 500).json({
+                    success: false,
+                    message: err.response?.data?.message || `Image generation failed with status ${err.response?.status || 500}`
+                });
+            }
+        }
 
         // Convert to Base64
         const base64Image = `data:image/png;base64,${Buffer.from(aiImageResponse.data, "binary").toString('base64')}`;
@@ -117,6 +148,7 @@ export const imageMessageController = async (req, res) => {
 
 
     } catch (error) {
-        res.json({ success: false, message: error.message });
+        console.error("imageMessageController error:", error.response?.status, error.response?.data || error.message);
+        return res.status(500).json({ success: false, message: error.response?.data?.message || error.message });
     }
 };
